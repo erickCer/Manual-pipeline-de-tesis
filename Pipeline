@@ -1,5 +1,5 @@
-#Manual de pipeline
-
+#Pipeline
+%%%%%%%%%%%%%%%%%%%%%%  Control de calidad  %%%%%%%%%%%%%%%%%%%%%%
 FastQC  analiza la calidad y distribución del tamaño de los datos.
 Generalmente las lecturas en sentido directo (FWD), de 5′ a 3′, suelen tener una calidad
 superior a las obtenidas contrasentido (RVS).
@@ -10,3 +10,42 @@ El comando genera un archivo HTML con diferentes parámetros que indican la cali
 El siguiente comando obtiene el número exacto de secuencias que posee cada muestra. 
 En éste @M5691 es un identificador común que permite contar las secuencias de los archivos que se encuentran en formato fastq.
 $ grep -c ’@M05691’ *.fastq
+
+%%%%%%%%%%%%%%%%%%%%%%  Código de barras y remoción del primer  %%%%%%%%%%%%%%%%%%%%%%
+En éste paso se generan dos archivos con el script add_barcode.py diseñado para pyt-
+hon 2.7. El primer documento es un archivo en formato fasta que contiene la secuencia
+del código de barras y el nombre de la muestra “barcode_sample.fasta”. En el comando
+de abajo sample_add es nombre de salida que se le da a éste documento. El segundo docu-
+mento es un archivo en formato fastq que contiene las secuencias con el código de barras
+agregado al principio “sample_barcoded.fastq”.
+$python2.7 add_barcode.py sample.fastq sample_add
+Posterior a ello se utiliza un script de Python que elimina el código de barras y la secuencia
+del primer. Se permiten 2 discrepancias para la secuencia del primer, 0 para la secuencia
+del código de barras. Se utilizan 2 secuencias diferentes para cada primer, dado que, en
+este caso se tienen secuencias en ambos sentidos. Las muestras se encuentra clasificadas
+de la siguiente manera:
+muestra_1_1.fastq
+muestra_1_2.fastq
+En ellas el primer número clasifica la secuencia a la que pertenece la muestra, mientras
+que el segundo es un indicador de si es FWD (1) o RVS(2). El script requiere que se indique
+la secuencia del primer que se utilizó para cada muestra, por lo que en este caso se usa la
+secuencia CCTACGGGA para las muestras FWD, mientras que las muestras RVS requieren la secuencia GACTACTC. 
+Se genera así, un documento en formato fastq.
+$ python2.7 fastq_strip_barcode_relabel2.py sample_x_1_barcoded.fastq CCTACGG-
+GA barcode_sample_add.fasta orign_x_1 >sample_x_1_s.fastq
+$python2.7 fastq_strip_barcode_relabel2.py sample_x_2_barcoded.fastq GACTACTC
+barcode_saple_add.fasta orign_x_2 >sample_x_2_s.fastq
+
+Para obtener la secuencia de los primers se utilizó una muestra tanto de secuencias FWD
+como RVS y se obtuvieron los porcentajes de discrepancia entre las secuencias del pri-
+mer y las secuencias descatradas, de forma que se obtuviera el menor numero de éstas,
+aprovechando que un primer puede tener entre 20 y 8 bases de ésta forma se eligieron las
+secuencias anteriores. El primer FWD elegido presentó un 1.46 % de discrepancia, mien-
+tras que una secuencia más larga, como lo fue CCTACGGGAGGCAGCAGTG presentaba
+19.54 % de discrepancia. Una secuencia demasiado corta mostraba un porcentaje de dis-
+crepancia de 2.24 %. De la misma manera el primer RVS elegido presentó un porcentaje de
+error de 1.03 %. Menor que otras secuencias
+
+%%%%%%%%%%%%%%%%%%%%%%  Cóntigo,Contik  %%%%%%%%%%%%%%%%%%%%%%
+
+
