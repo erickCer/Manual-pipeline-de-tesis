@@ -1,0 +1,10 @@
+#Instalación de programas
+Si estás leyendo esto es porque, como yo, eres un Neófit@ en el asunto y necesitas un guía que te ayude poco a poco 
+a enteder esto de la bioinformática, así que trataré de ser lo más claro que pueda.
+Lo primero que revisaremos será la instalación de los programas.
+
+A partir de éste punto los comandos utilizados encontrarás comandos, parámetros y nombres de los archivos de entrada requeridos (p.ej.).
+
+$ python2.7 fastq_strip_barcode_relabel2.py S_L_barcoded.fastq GACTACTC barco-
+de_sl_1_2_add.fasta orign_sl_1_2 >sl_1_2_s.fastq
+
