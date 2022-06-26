@@ -1,0 +1,12 @@
+#Manual de pipeline
+
+FastQC  analiza la calidad y distribución del tamaño de los datos.
+Generalmente las lecturas en sentido directo (FWD), de 5′ a 3′, suelen tener una calidad
+superior a las obtenidas contrasentido (RVS).
+
+$ fastqc ejemplo.fastq
+El comando genera un archivo HTML con diferentes parámetros que indican la calidad de las lecturas.
+
+El siguiente comando obtiene el número exacto de secuencias que posee cada muestra. 
+En éste @M5691 es un identificador común que permite contar las secuencias de los archivos que se encuentran en formato fastq.
+$ grep -c ’@M05691’ *.fastq
