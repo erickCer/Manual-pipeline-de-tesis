@@ -81,12 +81,16 @@ $conda env create -f picrust2-env.yaml
 
 
 %%%%%%%%%%%%%%%% tax4fun2 %%%%%%%%%%%%%%%%
-Descargue el tarball Tax4Fun_ 0.2.tar.gz en algún lugar de su disco local.
-Abra una consola y navegue a la carpeta que contiene Tax4Fun_ 0.2.tar.gz.
-Tipo R CMD INSTALL Tax4Fun_ 0.2.tar.gz (Nota: probablemente necesite privilegios
-de root para hacer esto)
-Tax4Fun debería instalarse ahora: escriba lo siguiente en R para verificar:
-Primero biblioteca (Tax4Fun) (espera para la ejecución), luego ayuda (Tax4Fun)
+Descargue el tarball Tax4Fun_ 0.2.tar.gz en su disco local con:
+wget https://github.com/bwemheu/Tax4Fun2/releases/download/1.1.5/Tax4Fun2_1.1.5.tar.gz
+
+Abra una consola y entre a la carpeta que contiene Tax4Fun_ 0.2.tar.gz.
+install.packages(pkgs = "Tax4Fun2_1.1.5.tar.gz", repos = NULL, source = TRUE)
+
+Tipo R CMD INSTALL Tax4Fun_ 0.2.tar.gz 
+Dentro de R el comando
+Library('Tax4Fun')  debe correr sin problemas
+
 
 
 
