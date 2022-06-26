@@ -1,10 +1,23 @@
 #Instalación de programas
 Si estás leyendo esto es porque, como yo, eres un Neófit@ en el asunto y necesitas un guía que te ayude poco a poco 
 a enteder esto de la bioinformática, así que trataré de ser lo más claro que pueda.
-Lo primero que revisaremos será la instalación de los programas.
-
-A partir de éste punto los comandos utilizados encontrarás comandos, parámetros y nombres de los archivos de entrada requeridos (p.ej.).
+Lo primero que revisaremos será la instalación de los programas. A partir de éste punto los comandos utilizados encontrarás comandos, parámetros y nombres de los archivos de entrada requeridos 
+Donde un comando la acción que ejecuta el programa. Los parámetros son las condiciones bajo las cuales se lleva a cabo la acciones.
+Y el archivo de entrada, pues bueno, es el archivo que se requiere para llevar a cabo el comando.
+Por lo tanto en el siguiente ejemplo:
 
 $ python2.7 fastq_strip_barcode_relabel2.py S_L_barcoded.fastq GACTACTC barco-
 de_sl_1_2_add.fasta orign_sl_1_2 >sl_1_2_s.fastq
 
+python2.7  es el programa que lleva a cabo el comando fastq_strip_barcode_relabel2.py sobre el archivo S_L_barcoded.fastq con los parámetros GACTACTC barco-
+de_sl_1_2_add.fasta orign_sl_1_2 >sl_1_2_s.fastq
+
+Descargar de https://www.bioinformatics.babraham.ac.uk/projects/fastqc/ el
+archivo “fastqc_v0.11.5.zip"
+En la terminal seguir los siguientes comandos
+$ unzip fastqc_v0.11.5.zip
+$ cd FastQC
+$ java -version
+$ sudo apt install default-jre
+$ sudo apt install openjdk-8-jre-headless
+$ chmod 755 fastqc
