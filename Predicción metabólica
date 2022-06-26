@@ -1,1 +1,56 @@
-PICRUSt1
+%%%%%%%%%%%%  PICRUSt1  %%%%%%%%%%%%
+PICRUSt1 requiere de una tabla de OTU como archivo de entrada, construida con el
+método de referencia cerrada, contra la base de datos de Greengenes. Para esto se requiere la siguiente secuencia de comandos en QIIME1
+
+>pick_closed_reference_otus.py 
+>-i OTUS.fasta 
+>-o align 
+>-r “/greengenes_references_path"
+
+Este comando genera una carpeta con el nombre “align"que contiene los archivos de alineamiento y la tabla de OTUS en formato “biom". Posteriormente, dentro del ambiente de PICRUSt1 se utilizan los siguientes comandos:
+
+>normalize_by_copy_number.py
+>-i otu_table.biom 
+>-o normalized_otus.biom
+
+> predict_metagenomes.py 
+>-i normalized_otus.biom 
+>-o metagenome_predictions.biom
+
+> categorize_by_function.py 
+>-i metagenome_predictions.biom 
+>-l 1 
+>-c KEGG_path 
+>-o final_pathways.biom
+
+%%%%%%%%%%%%  PICRUSt2  %%%%%%%%%%%%
+Dentro del ambiente de qiime2
+> qiime_tools_import \
+>–inputh-path OTUS.fna \
+>–output-path OTU.qza \
+>–type FeatureData[Sequence]
+> qiime fragment-insertion sepp\
+>–i-representative sequences OTUS.qza \
+>–p-treads 2 \
+>–i-reference-database picrust2_default_sepp_ref.qza \
+>–output-dir attempt
+> qiime_tools_export \
+>–inputh-path tree.qza \
+>–output-path exp_tree
+
+Dentro del ambiente de PICRUSt2
+$hsp.py -i 16S -t tree.nwk -o marker_predicted_and_nsti.tsv -p 3 -n
+$hsp.py -i EC -t tree.nwk -o EC_predicted.tsv -p 3
+$hsp.py -i KO -t tree.nwk -o KO_predicted.tsv -p 3
+
+%%%%%%%%%%%%  TAX4FUN2  %%%%%%%%%%%%
+Dentro del ambiente de R
+>library('Tax4Fun2')
+
+>runRefBlast(path_to_otus = ’OTUS.fasta’, path_to_reference_data = “/home/erick/Solvetic/Tax4Fun2_ReferenceData_v2/", path_to_temp_folder = “Kelp_Ref99NR", database_mode= “Ref99NR", use_force = F, num_threads = 2)
+
+>makeFunctionalPrediction(path_to_otu_table = “OTUtab.txt”, path_to_reference_data= /home/erick/Solvetic/Tax4Fun2_ReferenceData_v2", path_to_temp_folder = “Kelp_Ref99NR”,database_mode = “Ref99NR", normalize_by_copy_number = T, min_identity_to_reference= 0.97)
+
+Como resultado se obtiene directamente normalizada la cantidad de KO presentes en cada
+muestra. La versión Beta crea 3 archivos, uno para cada nivel mientras que esta versión, la
+mas reciente, crea sólo un archivo.
