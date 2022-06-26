@@ -80,7 +80,7 @@ conda create -n picrust1 -c bioconda -c conda-forge picrust
 $conda env create -f picrust2-env.yaml      
 
 
-%%%%%%%%%%%%%%%% tax4fun2 %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% Tax4Fun2 %%%%%%%%%%%%%%%%
 Descargue el tarball Tax4Fun_ 0.2.tar.gz en su disco local con:
 wget https://github.com/bwemheu/Tax4Fun2/releases/download/1.1.5/Tax4Fun2_1.1.5.tar.gz
 
