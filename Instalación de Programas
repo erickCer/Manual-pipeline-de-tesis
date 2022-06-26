@@ -12,7 +12,10 @@ de_sl_1_2_add.fasta orign_sl_1_2 >sl_1_2_s.fastq
 python2.7  es el programa que lleva a cabo el comando fastq_strip_barcode_relabel2.py sobre el archivo S_L_barcoded.fastq con los parámetros GACTACTC barco-
 de_sl_1_2_add.fasta orign_sl_1_2 >sl_1_2_s.fastq
 
-Descargar de https://www.bioinformatics.babraham.ac.uk/projects/fastqc/ el
+%%%%%%%%%%%%%%%%  Fastqc  %%%%%%%%%%%%%%%%
+
+Descargar de 
+https://www.bioinformatics.babraham.ac.uk/projects/fastqc/ el
 archivo “fastqc_v0.11.5.zip"
 En la terminal seguir los siguientes comandos
 $ unzip fastqc_v0.11.5.zip
@@ -21,3 +24,69 @@ $ java -version
 $ sudo apt install default-jre
 $ sudo apt install openjdk-8-jre-headless
 $ chmod 755 fastqc
+$ sudo ln -s /home/.../...FastQC/fastqc /usr/bin/fastqc
+
+%%%%%%%%%%%%%%%% Paquetes en R   %%%%%%%%%%%%%%%%
+
+Por default en Linux viene instalado R por lo que para asegurarte de ello sólo debes escribir R en la terminal y se activará y te mostrará la versión que tienes instalada
+la instalación de paquetes es la siguiente:
+
+>install.packages(’paquete_a_instalar’)
+ 
+ #Para la instalación de Phyloseq se requieren los comandos
+
+>source("https://bioconductor.org/biocLite.R")
+>biocLite("phyloseq", type="source")
+
+
+%%%%%%%%%%%%%%%% USEARCH  %%%%%%%%%%%%%%%%
+
+Descargar la versión actual del programa usearch desde la página:
+https://www.drive5.com/usearch/download.html
+
+Dentro de la terminal
+$ ln -s usearch9.2.64_i86linux32 usearch
+$ chmod a+x usearch...
+$ sudo mv usearch /usr/bin/
+$ ./ USEARCH -version
+Para una correcta instalación el comando anterior devuelve como mensage el nombre completo con la versión instalada (p. ej.)
+$ usearch 10.0.240
+
+%%%%%%%%%%%%%%%% QIIME  %%%%%%%%%%%%%%%%
+Se requiere la instalación de miniconda, la cual se descarga desde https://conda.io/miniconda.html
+
+Dentro de la terminal
+$ bash Miniconda3-latest-Linux-x86_64.sh
+
+                QIIME1
+conda create -n qiime1 python=2.7 qiime matplotlib=1.4.3 mock nose -c biocon-
+da
+$ export PATH=/home/...
+                 QIIME2
+En la terminal usar la siguiente secuencia de comandos:
+$ conda update conda
+$ conda install -c conda cachecontrol
+$ conda install -c conda-forge r-pillar
+$ conda install -c anaconda
+$ conda install -c anaconda cachecontrol
+$ conda install wget
+$ wget https://data.qiime2.org/distro/core/qiime2-2018.2-py35-linux-conda.yml
+$ conda env create -n qiime2-2018.2 –file qiime2-2018.2-py35-linux-conda.yml
+
+
+%%%%%%%%%%%%%%%% PICRUSt  %%%%%%%%%%%%%%%%
+conda create -n picrust1 -c bioconda -c conda-forge picrust
+                 PICRUSt2
+$conda env create -f picrust2-env.yaml      
+
+
+%%%%%%%%%%%%%%%% tax4fun2 %%%%%%%%%%%%%%%%
+Descargue el tarball Tax4Fun_ 0.2.tar.gz en algún lugar de su disco local.
+Abra una consola y navegue a la carpeta que contiene Tax4Fun_ 0.2.tar.gz.
+Tipo R CMD INSTALL Tax4Fun_ 0.2.tar.gz (Nota: probablemente necesite privilegios
+de root para hacer esto)
+Tax4Fun debería instalarse ahora: escriba lo siguiente en R para verificar:
+Primero biblioteca (Tax4Fun) (espera para la ejecución), luego ayuda (Tax4Fun)
+
+
+
