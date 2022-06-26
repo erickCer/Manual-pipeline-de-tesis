@@ -1,0 +1,169 @@
+#Pipeline
+%%%%%%%%%%%%%%%%%%%%%%  Control de calidad  %%%%%%%%%%%%%%%%%%%%%%
+FastQC  analiza la calidad y distribución del tamaño de los datos.
+Generalmente las lecturas en sentido directo (FWD), de 5′ a 3′, suelen tener una calidad
+superior a las obtenidas contrasentido (RVS).
+
+$ fastqc ejemplo.fastq
+El comando genera un archivo HTML con diferentes parámetros que indican la calidad de las lecturas.
+
+El siguiente comando obtiene el número exacto de secuencias que posee cada muestra. 
+En éste @M5691 es un identificador común que permite contar las secuencias de los archivos que se encuentran en formato fastq.
+$ grep -c ’@M05691’ *.fastq
+
+%%%%%%%%%%%%%%%%%%%%%%  Código de barras y remoción del primer  %%%%%%%%%%%%%%%%%%%%%%
+
+En éste paso se generan dos archivos con el script add_barcode.py diseñado para pyt-
+hon 2.7. El primer documento es un archivo en formato fasta que contiene la secuencia
+del código de barras y el nombre de la muestra “barcode_sample.fasta”. En el comando
+de abajo sample_add es nombre de salida que se le da a éste documento. El segundo docu-
+mento es un archivo en formato fastq que contiene las secuencias con el código de barras
+agregado al principio “sample_barcoded.fastq”.
+
+$python2.7 add_barcode.py sample.fastq sample_add
+
+Posterior a ello se utiliza un script de Python que elimina el código de barras y la secuencia
+del primer. Se permiten 2 discrepancias para la secuencia del primer, 0 para la secuencia
+del código de barras. Se utilizan 2 secuencias diferentes para cada primer, dado que, en
+este caso se tienen secuencias en ambos sentidos. Las muestras se encuentra clasificadas
+de la siguiente manera:
+
+muestra_1_1.fastq
+muestra_1_2.fastq
+
+En ellas el primer número clasifica la secuencia a la que pertenece la muestra, mientras
+que el segundo es un indicador de si es FWD (1) o RVS(2). El script requiere que se indique
+la secuencia del primer que se utilizó para cada muestra, por lo que en este caso se usa la
+secuencia CCTACGGGA para las muestras FWD, mientras que las muestras RVS requieren la secuencia GACTACTC. 
+Se genera así, un documento en formato fastq.
+
+$ python2.7 fastq_strip_barcode_relabel2.py sample_x_1_barcoded.fastq CCTACGG-GA barcode_sample_add.fasta orign_x_1 >sample_x_1_s.fastq
+$python2.7 fastq_strip_barcode_relabel2.py sample_x_2_barcoded.fastq GACTACTC barcode_saple_add.fasta orign_x_2 >sample_x_2_s.fastq
+
+Para obtener la secuencia de los primers se utilizó una muestra tanto de secuencias FWD
+como RVS y se obtuvieron los porcentajes de discrepancia entre las secuencias del pri-
+mer y las secuencias descatradas, de forma que se obtuviera el menor numero de éstas,
+aprovechando que un primer puede tener entre 20 y 8 bases de ésta forma se eligieron las
+secuencias anteriores. El primer FWD elegido presentó un 1.46 % de discrepancia, mien-
+tras que una secuencia más larga, como lo fue CCTACGGGAGGCAGCAGTG presentaba
+19.54 % de discrepancia. Una secuencia demasiado corta mostraba un porcentaje de dis-
+crepancia de 2.24 %. De la misma manera el primer RVS elegido presentó un porcentaje de
+error de 1.03 %. Menor que otras secuencias
+
+%%%%%%%%%%%%%%%%%%%%%%  Cóntigo,Contik  %%%%%%%%%%%%%%%%%%%%%%
+En esta sección se procedió a realizar el contigo de las secuencias es decir, el ensamblaje
+de las clonas en una serie ininterrumpida generando secuencias superpuestas [144]. Este
+procedimiento se lleva acabo con las secuencias FWD y RVS de la misma muestra utili-
+zando el software USEARCH, cuya salida, además del archivo con las secuencias unidas, son
+las estadísticas de errores obtenidos por los alineamientos. Se llevó acabo el procedimien-
+to con las muestras de 2 puntos diferentes del análisis para hacer una comparación del
+“rendimiento" obtenido,éstos puntos son posteriores al procedimiento de código de barras
+con la muestra original
+
+$usearch -fastq_mergepairs sample_1_1_barcoded.fastq -reverse sample_1_2_barcoded.fastq -fastq_maxdiffs 10 -fastqout merged_sample_bc.fastq
+
+Todas las secuencias, al final se unen en un solo archivo por medio del comando:
+
+cat *_s.fastq >all_reads.fastq
+
+%%%%%%%%%%%%%%%%%%%%%%  Filtro de las secuencias  %%%%%%%%%%%%%%%%%%%%%%
+Para esta sección se requiere revisar la gráfica “Por calidad de secuencia base" del archivo HTML generado por Fastqc para interpretar la calidad de las secuencias.
+En éstas muestras se realizó el filtrado con un parámetro de  420 pb, obtieniedo sólo un 0.2 % de pérdida de datos.
+
+$usearch -fastq_filter all_reads.fastq -fastq_trunclen 425 -fastaout AllTrim425.fasta
+
+%%%%%%%%%%%%%%%%%%%%%%  Dereplicación %%%%%%%%%%%%%%%%%%%%%%
+En este punto se procede a unir las secuencias que son 100 % iguales facilitando el
+procesamiento al trabajar con menos secuencias.
+
+$ usearch -fastx_uniques AllTrim425.fasta -fastaout DeRep425.fasta -sizeout
+
+%%%%%%%%%%%%%%%%%%%%%%  Agrupamiento (Clustering) %%%%%%%%%%%%%%%%%%%%%%
+Este comando se utiliza para realizar una agrupación de OTUs con filtrado de quimera
+(algoritmo UPARSE-OTU) sin embargo tiene diversos parámetros a considerar
+El comando cluster_otus realiza una agrupación de 97 % OTU utilizando el algoritmo
+UPARSE-OTU.
+Para la mayoría de los propósitos, considero que el clúster del 97 % de OTU es obsole-
+to. Es mejor usar el comando unoise para recuperar el conjunto completo de secuen-
+cias biológicas en las lecturas. Estas también son OTU válidas; Los llamo "ZOTU"para
+OTU de radio cero, para enfatizar esto.
+La entrada a cluster_otus es un archivo FASTA que contiene lecturas de calidad fil-
+tradas, recortadas globalmente y replicadas de un gen marcador de experimento de
+secuenciación de amplicón, por ejemplo, 16S o ITS. En general, se recomienda des-
+cartar las lecturas simples.
+La opción -minsize se puede usar para especificar una abundancia mínima; por ejem-plo, puede usar -minsize 2 para descartar singletons.
+La opción -otu_radius_pct especifica el radio"de la OTU como un porcentaje, es decir,
+la diferencia máxima entre una secuencia miembro OTU y la secuencia representativa
+de esa OTU. El valor predeterminado es 3.0, que corresponde a una identidad mínima
+del 97 %. No se recomienda usar un valor no predeterminado; vea UPARSE OTUradius para discusión y solución para hacer OTUs en diferentes identidades.
+La opción -uparseout especifica un archivo de salida de texto con pestañas a medi-
+da que se clasificaron las secuencias de entrada. 
+La opción -uparsealnout genera un archivo de texto que contiene una alineación legible por humanos de cada secuencia de consulta a su modelo UPARSE-REF.
+El comando y con los parámetros considerados es el siguiente:
+
+$ usearch -cluster_otus DeRep420.fasta -otus OTUs425.fasta -relabel OTU_ -minsize 5
+
+%%%%%%%%%%%%%%%%%%%%%%  Mapeo global de las lecturas (incluidos los singletons) %%%%%%%%%%%%%%%%%%%%%%
+Recordar que la taxonomía (estadística) depende:
+Archivo de referencia (base de datos), que siempre debe estar lo más actualizado
+posible. El tamaño y la calidad de las secuencias
+A forma de verificar individualmente a taxonomia eh com o NCBI: https://blast.ncbi.nlm.nlh.gov
+
+$ usearch -usearch_global AllTrim420.fasta -db OTUs420.fasta -strand plus -id 0.97-uc map_420t.uc
+
+%%%%%%%%%%%%%%%%%%%%%%  Taxonomía %%%%%%%%%%%%%%%%%%%%%%
+
+El comando utax utiliza el algoritmo UTAX para predecir la taxonomía de las secuen-
+cias de consulta en formato FASTA o FASTQ. Se requiere una base de datos de referencia
+en formato UDB. El comando makeudb_utax se usa para crear la base de datos. Consulte
+la página de descargas de UTAX para ver los archivos de referencia disponibles. Las pre-
+dicciones de taxonomía se escriben en el archivo utaxout. Las predicciones en el archivo
+-utaxout se escriben dos veces: una vez con valores de confianza y otra después de aplicar
+un umbral de confianza, manteniendo solo los rangos con suficiente confianza. El umbral
+se especifica mediante la opción -utax_cutoff (por defecto 0.9). La opción -alnout especifica
+un archivo de salida legible por humanos que muestra la alineación con el hit superior y
+las identidades con los vecinos más cercanos en cada rango (ver archivo de ejemplo aquí).
+Esto es útil para la revisión manual de predicciones. Tenga en cuenta que esta opción ha-
+rá que el comando utax se ejecute más lentamente, ya que se necesitan más cálculos para
+crear las alineaciones Nota: El comando utax no es compatible con v10. Use sintax.
+
+                        Base de datos RDP
+Se debe crear documento de base de datos en la máquina en la que se esté trabajando
+con usearch, para esto se requiere el del archivo rdp_16s_v16_sp.fa que se encuentra dis-
+ponible en https://drive5.com/usearch/manual/sintax_downloads.html y delsiguiente
+comando:
+
+$ usearch -makeudb_sintax rdp_16s_v16.fa -output rdp_16s.udb
+
+                        Predicción taxonómica
+El comando sintax usa el algoritmo SINTAX para predecir la taxonomía para las se-
+cuencias de consulta en formato FASTA o FASTQ. Vea el documento SINTAX para más
+detalles. Puede usar el comando "sintax_summary"para obtener un archivo de texto con
+pestañas para hacer figuras. La base de datos de búsqueda debe tener anotaciones de ta-
+xonomía. El comando "makeudb_sintax"se puede utilizar para crear una base de datos
+UDB, que es más rápida de cargar. Consulte la página de descargas de SINTAX para ver
+los archivos de referencia disponibles en formato FASTA. Consulte también ¿Qué base de
+datos debo usar? Las predicciones de taxonomía se escriben en el archivo tabbedout". Los
+primeros tres campos son:
+1. etiqueta de secuencia de consulta
+2. predicción con valores boostrap
+3. filamento.
+Si se da la opción sintax_cutoff", las predicciones se escriben por segunda vez después de
+aplicar el umbral de confianza, manteniendo solo los rangos con suficiente confianza. En
+las lecturas de V4, el uso de un valor de corte de 0.8 proporciona predicciones con una
+precisión similar a RDP con un límite de arranque del 80 %. Se debe especificar la opción
+de cadena. Multithreading es compatible.
+
+$usearch -sintax OTUs.fasta -db rdp_16s.udb -tabbedout tabtax_rdp.txt -strand both -
+sintax_cutoff 0.8
+
+                         Tabla de OTUs 
+El script uc2otutab.py requiere la versión 2.7 de python, para generar la tabla de OTUs.
+Para esto se utiliza el siguiente comando:
+
+python2.7 ucotutab.py map_420.uc >OTUtab.txt
+
+                         Alineación de secuencias múltiples y construcción del árbol
+Dentro de qiime1
+align_seqs.py -i OTUS.fasta
+make_phylogeny.py -i OTUS_aligned.fasta
