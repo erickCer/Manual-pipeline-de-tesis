@@ -24,6 +24,15 @@ Este comando genera una carpeta con el nombre “align"que contiene los archivos
 >-o final_pathways.biom
 
 %%%%%%%%%%%%  PICRUSt2  %%%%%%%%%%%%
+#####Primero que nada para trabajar con PICRUSt2 se requiere:
+1)Los softwares qiime2 y PICRUSt2
+2)El archivo con las secuencias de las OTUS en formato .fna. (la misma tabla de OTUS original, sólo que con la extensión fna en vez de .fasta) y  la tabla de otus convertida a formato biom con el siguiente comando:
+
+[}$biom convert -i otutab.txt -o otutab.biom --table-type="OTU table" --to-hdf5
+
+Ahora dentro del ambiente de conda de  QIIME2 se procede de a importar las secuencias 
+
+
 Dentro del ambiente de qiime2
 > qiime_tools_import \
 >–inputh-path OTUS.fna \
